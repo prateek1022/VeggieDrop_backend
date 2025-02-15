@@ -1,0 +1,154 @@
+const { CustomerRepository } = require("../database");
+const {
+  FormateData,
+  GeneratePassword,
+  GenerateSalt,
+  GenerateSignature,
+  ValidatePassword,
+} = require("../utils");
+
+// All Business logic will be here
+class CustomerService {
+  constructor() {
+    this.repository = new CustomerRepository();
+  }
+
+  async SignIn(userInputs) {
+    const { email,password } = userInputs;
+
+    const existingCustomer = await this.repository.FindCustomer({ email });
+
+    if (existingCustomer) {
+       const validPassword = await ValidatePassword(password, existingCustomer.password, existingCustomer.salt);
+       if(validPassword){
+      const token = await GenerateSignature({
+         email: existingCustomer.email,
+        _id: existingCustomer._id,
+      });
+      return FormateData({
+        id: existingCustomer._id,
+        isAdmin: existingCustomer?.isAdmin,
+        token,
+      });
+         }
+    }
+
+    return FormateData({"message" : "user not found"});
+  }
+
+  async SignUp(userInputs) {
+    const {  phone } = userInputs;
+      let user = await this.repository.FindCustomerByPhone({ phone });
+      if(user===null){
+        user = await this.repository.CreateCustomer({
+          phone,
+        });
+      }
+    const token = await GenerateSignature({
+      phone: phone,
+      _id: user._id,
+    });
+    return FormateData({ id: user._id, token });
+  }
+
+  async getUsers() {
+    const all = await this.repository.allusers();
+    return FormateData(all);
+  }
+
+  async AddNewAddress(_id, userInputs) {
+    const { type, completeAddress, latitude, longitude } = userInputs;
+
+    const addressResult = await this.repository.CreateAddress({
+      _id,
+      type,
+      completeAddress,
+      latitude,
+      longitude,
+    });
+
+    return FormateData(addressResult);
+  }
+
+  async getAddresses(_id) {
+    const allAddresses = await this.repository.getAllAddresses({ _id });
+
+    return FormateData(allAddresses);
+  }
+
+  async GetProfile(id) {
+    const existingCustomer = await this.repository.FindCustomerById({ id });
+    return FormateData(existingCustomer);
+  }
+
+  async GetShopingDetails(id) {
+    const existingCustomer = await this.repository.FindCustomerById({ id });
+
+    if (existingCustomer) {
+      // const orders = await this.shopingRepository.Orders(id);
+      return FormateData(existingCustomer);
+    }
+    return FormateData({ msg: "Error" });
+  }
+
+  async GetWishList(customerId) {
+    const wishListItems = await this.repository.Wishlist(customerId);
+    return FormateData(wishListItems);
+  }
+
+  async AddToWishlist(customerId, product) {
+    const wishlistResult = await this.repository.AddWishlistItem(
+      customerId,
+      product
+    );
+    return FormateData(wishlistResult);
+  }
+
+  async ManageCart(customerId, product, qty, isRemove) {
+    const cartResult = await this.repository.AddCartItem(
+      customerId,
+      product,
+      qty,
+      isRemove
+    );
+    return FormateData(cartResult);
+  }
+
+  async ManageOrder(customerId, order) {
+    const orderResult = await this.repository.AddOrderToProfile(
+      customerId,
+      order
+    );
+    return FormateData(orderResult);
+  }
+
+  async SubscribeEvents(payload) {
+    console.log("Triggering.... Customer Events");
+
+    payload = JSON.parse(payload);
+
+    const { event, data } = payload;
+
+    const { userId, product, order, qty } = data;
+
+    switch (event) {
+      case "ADD_TO_WISHLIST":
+      case "REMOVE_FROM_WISHLIST":
+        this.AddToWishlist(userId, product);
+        break;
+      case "ADD_TO_CART":
+        this.ManageCart(userId, product, qty, false);
+        break;
+      case "REMOVE_FROM_CART":
+        this.ManageCart(userId, product, qty, true);
+        break;
+      case "CREATE_ORDER":
+        this.ManageOrder(userId, order);
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+module.exports = CustomerService;

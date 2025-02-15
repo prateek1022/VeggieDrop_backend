@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\.github\\workflows",
+    "\\customer\\src\\api\\middlewares",
+    "\\customer\\src\\config",
+    "\\customer\\src\\database",
+    "\\customer\\src\\database\\models",
+    "\\products\\src",
+    "\\shopping\\src",
+    "\\shopping\\src\\database",
+    "\\shopping\\src\\services"
+  ],
+  "PreviewInSolutionExplorer": false
+}
