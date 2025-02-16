@@ -1,4 +1,4 @@
-version: "3.8"  # Update the version to a more recent one (optional)
+# version: "3.8"  # Update the version to a more recent one (optional)
 
 services:
   rabbitmq:
