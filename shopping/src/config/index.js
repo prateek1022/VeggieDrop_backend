@@ -1,4 +1,4 @@
-require('dotenv').config();
+//require('dotenv').config();
 
 // if (process.env.NODE_ENV !== "prod") {
 //   const configFile = `./.env.${process.env.NODE_ENV}`;
