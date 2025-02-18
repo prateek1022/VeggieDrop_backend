@@ -1,6 +1,6 @@
 const { ShoppingRepository } = require("../database");
 const { FormateData } = require("../utils");
-const stripe = require("stripe")(process.env.STRIPE_KEY);
+const stripe = require("stripe")("ddd");
 
 // All Business logic will be here
 class ShoppingService {
