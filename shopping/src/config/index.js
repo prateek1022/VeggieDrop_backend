@@ -11,7 +11,7 @@ require('dotenv').config();
 
 module.exports = {
   PORT: process.env.PORT,
-  DB_URL: process.env.MONGODB_URI,
+  DB_URL: "mongodb+srv://1022prateeksharma:!1pRateek@shoppingcluster223.gd5ef.mongodb.net/collection?retryWrites=true&w=majority&appName=ShoppingCluster223",
   APP_SECRET: process.env.APP_SECRET,
   MSG_QUEUE_URL: process.env.RABBITMQ_URL,
   EXCHANGE_NAME: 'ONLINE_SHOPPING',
