@@ -39,6 +39,8 @@ services:
     volumes:
       - .:/app
       - /app/shopping/node_modules
+    env_file:
+      - ./shopping/.env
 
   customer:
     build:
