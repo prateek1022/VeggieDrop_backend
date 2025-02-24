@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { OrderModel, CartModel } = require("../models");
+const { OrderModel, OrderSubModel, CartModel } = require("../models");
 const { v4: uuidv4 } = require("uuid");
 
 //Dealing with data base operations
@@ -73,58 +73,27 @@ class ShoppingRepository {
     }
   }
 
-  async CreateNewOrder(id,transaction, products, total, address, status) {
-    //required to verify payment through TxnId
-
+  async CreateNewOrder(orderData) {
     try {
-      const data = { id,transaction, products, total, address, status };
-
-      const order = new OrderModel({
-        customer_id: id,
-        transaction: transaction,
-        ...data,
-      });
-      const orderResult = await order.save();
-      return orderResult;
+        const order = new OrderModel({ ...orderData });
+        return await order.save();
     } catch (error) {
-      console.log(error);
+        console.error("Error Creating Order:", error);
+        throw error;
     }
+}
 
-    // const cart = await CartModel.findOne({ customerId: id })
-
-    // if(cart){
-
-    //     let amount = 0;
-
-    //     let cartItems = cart.items;
-
-    //     if(cartItems.length > 0){
-    //         //process Order
-
-    //         cartItems.map(item => {
-    //             amount += parseInt(item.product.price) *  parseInt(item.unit);
-    //         });
-
-    //         const orderId = uuidv4();
-
-    //         const order = new OrderModel({
-    //             orderId,
-    //             customerId,
-    //             amount,
-    //             status: 'received',
-    //             items: cartItems
-    //         })
-
-    //         cart.items = [];
-
-    //         const orderResult = await order.save();
-    //         await cart.save();
-    //         return orderResult;
-
-    //     }
-
-    // }
+async CreateNewOrderSub(orderSubData) {
+  try {
+      const orderSub = new OrderSubModel({ ...orderSubData });
+      return await orderSub.save();
+  } catch (error) {
+      console.error("Error Creating Subscription Order:", error);
+      throw error;
   }
+}
+
+
 }
 
 module.exports = ShoppingRepository;

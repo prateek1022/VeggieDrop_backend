@@ -9,20 +9,63 @@ module.exports = (app,channel) => {
   SubscribeMessage(channel,service);
 
   app.post("/order", UserAuth, async (req, res, next) => {
-    const { _id } = req.user;
-    const { products,total,address,status } = req.body;
+    console.log("Processing Order...");
 
-    const { data } = await service.PlaceOrder({ _id,products,total,address,status });
+    try {
+        const { _id } = req.user;
+        const orderData = {
+            customer_id: _id,
+            ...req.body
+        };
 
-    const payload = await service.GetOrderPayload(_id, data, "CREATE_ORDER");
+        console.log("Received Order Data:", orderData); 
+        
+        const { data } = await service.PlaceOrder(orderData);
+        const payload = await service.GetOrderPayload(_id, data, "CREATE_ORDER");
+        
+        PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(payload));
+        res.status(200).json(data);
+    } catch (error) {
+        console.error("Order Processing Error:", error);
+        res.status(400).json({
+            success: false,
+            message: error.message || "Something went wrong while processing the order",
+            errors: error.errors || {}
+        });
+    }
+});
 
-    // PublishCustomerEvent(payload);
-    PublishMessage(channel,CUSTOMER_BINDING_KEY, JSON.stringify(payload));
+app.post("/orderSub", UserAuth, async (req, res, next) => {
+  console.log("Processing Subscription Order...");
 
-    res.status(200).json(data);
-  });
+  try {
+      const { _id } = req.user;
+      const orderSubData = {
+          customer_id: _id,
+          ...req.body
+      };
+
+      console.log("Received Subscription Order Data:", orderSubData);
+
+      const { data } = await service.PlaceOrderSub(orderSubData);
+      const payload = await service.GetOrderPayload(_id, data, "CREATE_ORDER_SUB");
+
+      PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(payload));
+      res.status(200).json(data);
+  } catch (error) {
+      console.error("Subscription Order Processing Error:", error);
+      res.status(400).json({
+          success: false,
+          message: error.message || "Something went wrong while processing the subscription order",
+          errors: error.errors || {}
+      });
+  }
+});
+
 
   app.get("/orders", UserAuth, async (req, res, next) => {
+    console.log("aaaaaayelllloooo");
+    
     const { _id } = req.user;
 
     const { data } = await service.GetOrders(_id);

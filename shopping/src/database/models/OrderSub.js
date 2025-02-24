@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const OrderSchema = new Schema(
+const OrderSubSchema = new Schema(
   {
     payment_mode: {
       type: String,
@@ -35,6 +35,13 @@ const OrderSchema = new Schema(
         subcategory: String,
         unit: String,
         weight: String,
+        subscriptionType: {
+          type: String,
+          enum: ["Weekly", "Monthly", "Daily", "Alternate days"],
+          required: true,
+        },
+        dates: [String],
+        startDate: String,
       },
     ],
     total: {
@@ -77,4 +84,4 @@ const OrderSchema = new Schema(
   }
 );
 
-module.exports = mongoose.model("order", OrderSchema);
+module.exports = mongoose.model("orderSub", OrderSubSchema);

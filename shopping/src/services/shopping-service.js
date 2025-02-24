@@ -52,20 +52,16 @@ class ShoppingService {
     return FormateData(cartItems);
   }
 
-  async PlaceOrder(userInput) {
-    const { _id, transaction, products, total, address, status } = userInput;
-
-    const orderResult = await this.repository.CreateNewOrder(
-      _id,
-      transaction,
-      products,
-      total,
-      address,
-      status
-    );
-
+  async PlaceOrder(orderData) {
+    const orderResult = await this.repository.CreateNewOrder(orderData);
     return FormateData(orderResult);
-  }
+}
+
+async PlaceOrderSub(orderSubData) {
+  const orderResult = await this.repository.CreateNewOrderSub(orderSubData);
+  return FormateData(orderResult);
+}
+
 
   async GetOrders(customerId) {
     const orders = await this.repository.Orders(customerId);
